@@ -1,0 +1,10 @@
+streamlit
+openai
+python-dotenv
+pandas
+scikit-learn
+joblib
+matplotlib
+scikit-learn
+sentence-transformers
+torch
