@@ -1,9 +1,19 @@
+# app.py
+
+# ─── Always re-ingest & re-train ───────────────────────────────────────────────
+from src.load_data   import main as run_ingest
+from src.train_model import train as run_train_model
+
+run_ingest()
+run_train_model()
+
+# ─── Now start the Streamlit app ───────────────────────────────────────────────
 import streamlit as st
 import sqlite3
 
 from src.llm_client import get_advice_llm
 from src.model_utils import predict_advice_type
-from src.retrieval import semantic_fetch as fetch_examples
+from src.retrieval   import semantic_fetch as fetch_examples
 
 st.set_page_config(page_title="Counselor Guidance POC")
 st.title("🌱 Mental Health Counselor Guidance")
@@ -16,21 +26,17 @@ if mode == "LLM Advice":
         if not text.strip():
             st.error("Enter some notes first.")
         else:
-            # 1) Fetch examples for deduplication
+            # Fetch & dedupe examples
             raw_examples = fetch_examples(text, k=5)
-
-            # 2) Deduplicate by normalized context, keep first 3 unique
-            seen = set()
-            examples = []
+            seen = set(); examples = []
             for ctx, resp in raw_examples:
-                norm = " ".join(ctx.split())  # collapse whitespace/newlines
+                norm = " ".join(ctx.split())
                 if norm not in seen:
                     seen.add(norm)
                     examples.append((ctx, resp))
                 if len(examples) >= 3:
                     break
 
-            # 3) Display unique examples
             st.subheader("🔍 Similar Past Dialogues")
             if examples:
                 for ctx, resp in examples:
@@ -38,7 +44,6 @@ if mode == "LLM Advice":
             else:
                 st.info("No similar examples found.")
 
-            # 4) Invoke LLM
             with st.spinner("Thinking…"):
                 advice = get_advice_llm(text)
             st.subheader("💡 AI-Generated Advice")
