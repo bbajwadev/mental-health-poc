@@ -2,10 +2,13 @@
 import os
 from dotenv import load_dotenv
 import openai
+import streamlit as st
+
 from src.retrieval import semantic_fetch as fetch_examples
 
-load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+
+load_dotenv()  # loads .env locally
+openai.api_key = os.getenv("OPENAI_API_KEY", st.secrets["OPENAI_API_KEY"])
 
 def get_advice_llm(patient_text: str) -> str:
     shots = fetch_examples(patient_text, k=3)
